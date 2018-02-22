@@ -248,6 +248,47 @@ public class SparseMatrix {
     }
 
     // Adding two matrices
+    /*
+            SparseMatrix mTotal=new SparseMatrix();
+        mTotal.entries=new ArrayList<>();
+        mTotal.numCols=M.numColumns();
+        for(int i = 0;i < M.entries.size();i++) {
+            mTotal.entries.add(new ArrayList <>());
+        }
+        if(numColumns()!=M.numColumns() || numRows()!=M.numRows()) {
+            System.err.println("Matrices sizes are not equal.");
+        }else {
+            for(int i=0;i<numRows();i++){
+                List<Integer> colsFirstM=new ArrayList <>();
+                for(int j=0;j<M.entries.get(i).size();j++){
+                    mTotal.entries.get(i).add(new Entry(M.entries.get(i).get(j).getColumn(),M.entries.get(i).get(j).getValue()));
+                    colsFirstM.add(mTotal.entries.get(i).get(j).getColumn());
+                }
+                for(int j=0;j<entries.get(i).size();j++){
+                    int currCol=entries.get(i).get(j).getColumn();
+                    int curVal=entries.get(i).get(j).getValue();
+                    if(colsFirstM.contains(currCol)){
+                        int col=colsFirstM.indexOf(currCol);
+                        mTotal.entries.get(i).get(col).setValue(mTotal.entries.get(i).get(col).getValue()+curVal);
+                    }else if(colsFirstM.size()==0 || currCol>colsFirstM.get(colsFirstM.size()-1)){
+                        mTotal.entries.get(i).add(new Entry(currCol,curVal));
+                        colsFirstM.add(currCol);
+                    }else{
+                        int k;
+                        for(k=0;k<colsFirstM.size();k++){
+                            if(colsFirstM.get(k)>currCol){
+                                break;
+                            }
+                        }
+                        mTotal.entries.get(i).add(k, new Entry(currCol,curVal));
+                        colsFirstM.add(k,currCol);
+                    }
+                }
+            }
+        }
+        return mTotal;
+
+     */
     public SparseMatrix add(SparseMatrix M) {
         SparseMatrix mTotal=new SparseMatrix();
         mTotal.entries=new ArrayList<>();

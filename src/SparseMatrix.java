@@ -3,7 +3,6 @@
  * Please respect the format for both matrices and vectors text files since they are assumed to be correct
  * and therefore not checked.
  * Adding matrices method might not be efficient enough O(n1+n2)
- * DID THIS WORK?
  */
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -140,7 +140,7 @@ public class SparseMatrix {
             mat_sum1.print();
             System.out.println();
 
-            System.out.println("Matrix1 * 2 + Matrix2 =");
+            /*System.out.println("Matrix1 * 2 + Matrix2 =");
             mat1.multiplyBy(2);
             SparseMatrix mat_sum2 = mat1.add(mat2);
             mat_sum2.print();
@@ -149,7 +149,7 @@ public class SparseMatrix {
             System.out.println("Matrix1 * 10 + Matrix2 =");
             mat1.multiplyBy(5);
             SparseMatrix mat_sum3 = mat1.add(mat2);
-            mat_sum3.print();
+            mat_sum3.print();*/
         }else if(args[0].equals("-v")) {
             if(args.length != 3) {
                 printCommandError();
@@ -183,7 +183,7 @@ public class SparseMatrix {
             entries = new ArrayList <>();
 
             for(int i = 0; i < numRows; ++ i) {
-                entries.add(new ArrayList <>());
+                entries.add(new ArrayList<>());
             }
 
             while(sc.hasNextInt()) {
@@ -251,41 +251,20 @@ public class SparseMatrix {
     public SparseMatrix add(SparseMatrix M) {
         SparseMatrix mTotal=new SparseMatrix();
         mTotal.entries=new ArrayList<>();
+        mTotal.entries.addAll(entries);
         mTotal.numCols=M.numColumns();
-        for(int i = 0;i < M.entries.size();i++) {
-            mTotal.entries.add(new ArrayList <>());
-        }
         if(numColumns()!=M.numColumns() || numRows()!=M.numRows()) {
             System.err.println("Matrices sizes are not equal.");
         }else {
-            for(int i=0;i<numRows();i++){
-                List<Integer> colsFirstM=new ArrayList <>();
-                for(int j=0;j<M.entries.get(i).size();j++){
-                    mTotal.entries.get(i).add(new Entry(M.entries.get(i).get(j).getColumn(),M.entries.get(i).get(j).getValue()));
-                    colsFirstM.add(mTotal.entries.get(i).get(j).getColumn());
-                }
-                for(int j=0;j<entries.get(i).size();j++){
-                    int currCol=entries.get(i).get(j).getColumn();
-                    int curVal=entries.get(i).get(j).getValue();
-                    if(colsFirstM.contains(currCol)){
-                        int col=colsFirstM.indexOf(currCol);
-                        mTotal.entries.get(i).get(col).setValue(mTotal.entries.get(i).get(col).getValue()+curVal);
-                    }else if(colsFirstM.size()==0 || currCol>colsFirstM.get(colsFirstM.size()-1)){
-                        mTotal.entries.get(i).add(new Entry(currCol,curVal));
-                        colsFirstM.add(currCol);
-                    }else{
-                        int k;
-                        for(k=0;k<colsFirstM.size();k++){
-                            if(colsFirstM.get(k)>currCol){
-                                break;
-                            }
-                        }
-                        mTotal.entries.get(i).add(k, new Entry(currCol,curVal));
-                        colsFirstM.add(k,currCol);
-                    }
+            mTotal.entries.get(0).add(new Entry(7,10));
+            for(int i = 0;i < numRows();i++) {
+                if(entries.get(i).size()>M.entries.get(i).size()){
+
                 }
             }
         }
+        print();
+        System.out.println();
         return mTotal;
     }
 
@@ -299,10 +278,9 @@ public class SparseMatrix {
         for(int i=0;i<entries.size();i++) {
             trans.numCols++;
             for(int j = 0;j < entries.get(i).size();j++) {
-                int col=i;
                 int row=entries.get(i).get(j).getColumn();
                 int val=entries.get(i).get(j).getValue();
-                trans.entries.get(row).add(new Entry(col,val));
+                trans.entries.get(row).add(new Entry(i,val));
             }
         }
         return trans;

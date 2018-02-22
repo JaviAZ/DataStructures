@@ -7,7 +7,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.List;
 import java.lang.Integer;
 // A class that represents a dense vector and allows you to read/write its elements
 class DenseVector{
@@ -139,7 +138,7 @@ public class SparseMatrix {
             SparseMatrix mat_sum1 = mat1.add(mat2);
             mat_sum1.print();
             System.out.println();
-            /*System.out.println("Matrix1 * 2 + Matrix2 =");
+            System.out.println("Matrix1 * 2 + Matrix2 =");
             mat1.multiplyBy(2);
             SparseMatrix mat_sum2 = mat1.add(mat2);
             mat_sum2.print();
@@ -148,7 +147,7 @@ public class SparseMatrix {
             System.out.println("Matrix1 * 10 + Matrix2 =");
             mat1.multiplyBy(5);
             SparseMatrix mat_sum3 = mat1.add(mat2);
-            mat_sum3.print();*/
+            mat_sum3.print();
         }else if(args[0].equals("-v")) {
             if(args.length != 3) {
                 printCommandError();
@@ -247,47 +246,6 @@ public class SparseMatrix {
     }
 
     // Adding two matrices
-    /*
-            SparseMatrix mTotal=new SparseMatrix();
-        mTotal.entries=new ArrayList<>();
-        mTotal.numCols=M.numColumns();
-        for(int i = 0;i < M.entries.size();i++) {
-            mTotal.entries.add(new ArrayList <>());
-        }
-        if(numColumns()!=M.numColumns() || numRows()!=M.numRows()) {
-            System.err.println("Matrices sizes are not equal.");
-        }else {
-            for(int i=0;i<numRows();i++){
-                List<Integer> colsFirstM=new ArrayList <>();
-                for(int j=0;j<M.entries.get(i).size();j++){
-                    mTotal.entries.get(i).add(new Entry(M.entries.get(i).get(j).getColumn(),M.entries.get(i).get(j).getValue()));
-                    colsFirstM.add(mTotal.entries.get(i).get(j).getColumn());
-                }
-                for(int j=0;j<entries.get(i).size();j++){
-                    int currCol=entries.get(i).get(j).getColumn();
-                    int curVal=entries.get(i).get(j).getValue();
-                    if(colsFirstM.contains(currCol)){
-                        int col=colsFirstM.indexOf(currCol);
-                        mTotal.entries.get(i).get(col).setValue(mTotal.entries.get(i).get(col).getValue()+curVal);
-                    }else if(colsFirstM.size()==0 || currCol>colsFirstM.get(colsFirstM.size()-1)){
-                        mTotal.entries.get(i).add(new Entry(currCol,curVal));
-                        colsFirstM.add(currCol);
-                    }else{
-                        int k;
-                        for(k=0;k<colsFirstM.size();k++){
-                            if(colsFirstM.get(k)>currCol){
-                                break;
-                            }
-                        }
-                        mTotal.entries.get(i).add(k, new Entry(currCol,curVal));
-                        colsFirstM.add(k,currCol);
-                    }
-                }
-            }
-        }
-        return mTotal;
-
-     */
     public SparseMatrix add(SparseMatrix M) {
         SparseMatrix mTotal=new SparseMatrix();
         mTotal.entries=new ArrayList<>(entries.size());
@@ -443,3 +401,46 @@ public class SparseMatrix {
         }
     }
 }
+
+/*
+public SparseMatrix add(SparseMatrix M) {
+    SparseMatrix mTotal=new SparseMatrix();
+    mTotal.entries=new ArrayList<>();
+    mTotal.numCols=M.numColumns();
+    for(int i = 0;i < M.entries.size();i++) {
+        mTotal.entries.add(new ArrayList <>());
+    }
+    if(numColumns()!=M.numColumns() || numRows()!=M.numRows()) {
+        System.err.println("Matrices sizes are not equal.");
+    }else {
+        for(int i=0;i<numRows();i++){
+            List<Integer> colsFirstM=new ArrayList <>();
+            for(int j=0;j<M.entries.get(i).size();j++){
+                mTotal.entries.get(i).add(new Entry(M.entries.get(i).get(j).getColumn(),M.entries.get(i).get(j).getValue()));
+                colsFirstM.add(mTotal.entries.get(i).get(j).getColumn());
+            }
+            for(int j=0;j<entries.get(i).size();j++){
+                int currCol=entries.get(i).get(j).getColumn();
+                int curVal=entries.get(i).get(j).getValue();
+                if(colsFirstM.contains(currCol)){
+                    int col=colsFirstM.indexOf(currCol);
+                    mTotal.entries.get(i).get(col).setValue(mTotal.entries.get(i).get(col).getValue()+curVal);
+                }else if(colsFirstM.size()==0 || currCol>colsFirstM.get(colsFirstM.size()-1)){
+                    mTotal.entries.get(i).add(new Entry(currCol,curVal));
+                    colsFirstM.add(currCol);
+                }else{
+                    int k;
+                    for(k=0;k<colsFirstM.size();k++){
+                        if(colsFirstM.get(k)>currCol){
+                            break;
+                        }
+                    }
+                    mTotal.entries.get(i).add(k, new Entry(currCol,curVal));
+                    colsFirstM.add(k,currCol);
+                }
+            }
+        }
+    }
+    return mTotal;
+}
+*/

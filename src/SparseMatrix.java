@@ -312,49 +312,40 @@ public class SparseMatrix {
                             mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter));
                             entries2Counter++;
                         }
-                    }else if(entries1Size!=0 && entries2Size!=0) {
+                    }else if(entries1Size!=0 && M.entries.get(i).size()!=0 && entries1Counter<entries1Size && entries2Counter<entries2Size) {
                         while (entries.get(i).get(entries1Counter).getColumn() == M.entries.get(i).get(entries2Counter).getColumn()) {
-                            System.out.println("test");
                             int totVal = entries.get(i).get(entries1Counter).getValue() + M.entries.get(i).get(entries2Counter).getValue();
                             mTotal.entries.get(i).add(new Entry(entries.get(i).get(entries1Counter).getColumn(), totVal));
                             entries1Counter++;
                             entries2Counter++;
-                            System.out.println("1while");
                             if(entries1Counter>=entries1Size){
-                                System.out.println("if 1");
                                 while (entries2Counter < entries2Size) {
                                     mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter));
                                     entries2Counter++;
-                                    System.out.println("1.1while");
                                 }
                                 break;
                             }else if(entries2Counter>=entries2Size){
-                                System.out.println("if 2");
                                 while (entries1Counter < entries1Size) {
                                     mTotal.entries.get(i).add(entries.get(i).get(entries1Counter));
                                     entries1Counter++;
-                                    System.out.println("1.2while");
                                 }
                                 break;
-                            }else if(entries1Counter>=entries1Size && entries2Counter>=entries2Size){
-                                System.out.println("if 3");
+                            }else if(entries1Counter<=entries1Size && entries2Counter<=entries2Size){
                                 break;
                             }
-                        }if(entries1Counter>=entries1Size && entries2Counter>=entries2Size){
+                        }
+                        if(entries1Counter<entries1Size && entries2Counter<entries2Size) {
                             while (entries.get(i).get(entries1Counter).getColumn() < M.entries.get(i).get(entries2Counter).getColumn() && entries1Counter < entries1Size) {
-                                System.out.println("2while");
                                 mTotal.entries.get(i).add(entries.get(i).get(entries1Counter));
                                 entries1Counter++;
                             }
                             while (M.entries.get(i).get(entries2Counter).getColumn() < entries.get(i).get(entries1Counter).getColumn() && entries2Counter < entries2Size) {
-                                System.out.println("3while");
                                 mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter));
                                 entries2Counter++;
                             }
                         }
                     }
                 }
-                System.out.println();
             }
         }
         return mTotal;

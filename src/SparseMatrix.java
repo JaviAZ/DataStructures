@@ -2,11 +2,13 @@
  * Student name: Javier Alcazar-Zafra
  * Please respect the format for both matrices and vectors text files since they are assumed to be correct
  * and therefore not checked.
- * Adding matrices method might not be efficient enough O(n1+n2)
+ * Adding matrices method is always O(n1+n2) or under it (if there are repeated columns in the same row in the two
+ *    matrices. To check, modify the comments in lines: 264, 267, 274, 384, 296, 304, 311, 316, 323.
  */
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.Scanner;
+import java.util.ArrayList;
 import java.lang.Integer;
 // A class that represents a dense vector and allows you to read/write its elements
 class DenseVector{
@@ -75,7 +77,7 @@ public class SparseMatrix {
         System.err.println(" - Matrix-vector multiplication: java SparseMatrix -v <MatrixFile> <VectorFile>");
     }
 
-    public static void main(String [] args) throws Exception {
+    public static void main(String [] args) {
         if(args.length < 2) {
             printCommandError();
             System.exit(-1);
@@ -179,24 +181,23 @@ public class SparseMatrix {
             int numRows = sc.nextInt();
             numCols = sc.nextInt();
             entries = new ArrayList <>();
-
             for(int i = 0; i < numRows; ++ i) {
                 entries.add(new ArrayList<>());
             }
-
             while(sc.hasNextInt()) {
                 // Read the row index, column index, and value of an element
                 int row = sc.nextInt();
                 int col = sc.nextInt();
                 int val = sc.nextInt();
-                Entry ntr=new Entry(col,val);
-                if(entries.get(row).isEmpty() ||entries.get(row)==null || col>entries.get(row).get(entries.get(row).size()-1).getColumn()){
-                    entries.get(row).add(ntr);
+                Entry ntr=new Entry(col,val); // Store entry in an object for simplicity
+                // Check if row has no entries or if the column of the entry to be input is larger than the column of the last entry in the row
+                if(entries.get(row).isEmpty() || entries.get(row)==null || col>entries.get(row).get(entries.get(row).size()-1).getColumn()){
+                    entries.get(row).add(ntr); // Append entry to the end
                 }else{
-                    for(int j=0;j<entries.get(row).size();j++){
-                        if(entries.get(row).get(j).getColumn()>col){
-                            entries.get(row).add(j, ntr);
-                            break;
+                    for(int i=0;i<entries.get(row).size();i++){ // Iterate throw the row
+                        if(entries.get(row).get(i).getColumn()>col){ // Look for the position in which the column to be input should go
+                            entries.get(row).add(i, ntr); // Add entry at that position and shift the rest of the row to the right
+                            break; // Break out of the loop to avoid infinite loop
                         }
                     }
                 }
@@ -247,80 +248,97 @@ public class SparseMatrix {
 
     // Adding two matrices
     public SparseMatrix add(SparseMatrix M) {
-        SparseMatrix mTotal=new SparseMatrix();
+        SparseMatrix mTotal=new SparseMatrix(); // Create new matrix to store the addition of the matrices
         mTotal.entries=new ArrayList<>(entries.size());
         mTotal.numCols=M.numColumns();
         if(numColumns()!=M.numColumns() || numRows()!=M.numRows()) {
             System.err.println("Matrices sizes are not equal.");
         }else {
-            for(int i = 0;i < numRows();i++) {
+            for(int i = 0;i < numRows();i++) { // Iterate through rows (both entries ArrayLists have the same size)
                 mTotal.entries.add(new ArrayList<>());
                 int entries1Size = entries.get(i).size();
                 int entries2Size = M.entries.get(i).size();
                 int entries1Counter=0;
                 int entries2Counter=0;
-                for(int j=0;j<(entries2Size+entries1Size);j++){
-                    if(entries1Size!=0 && entries2Size==0){
-                        while (entries1Counter < entries1Size) {
-                            mTotal.entries.get(i).add(entries.get(i).get(entries1Counter));
-                            entries1Counter++;
-                        }
-                    }else if(entries1Size==0 && entries2Size!=0){
-                        while (entries2Counter < entries2Size) {
-                            mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter));
-                            entries2Counter++;
-                        }
-                    }else if(entries1Size!=0 && M.entries.get(i).size()!=0 && entries1Counter<entries1Size && entries2Counter<entries2Size) {
-                        while (entries.get(i).get(entries1Counter).getColumn() == M.entries.get(i).get(entries2Counter).getColumn()) {
-                            int totVal = entries.get(i).get(entries1Counter).getValue() + M.entries.get(i).get(entries2Counter).getValue();
-                            mTotal.entries.get(i).add(new Entry(entries.get(i).get(entries1Counter).getColumn(), totVal));
-                            entries1Counter++;
-                            entries2Counter++;
-                            if(entries1Counter>=entries1Size){
-                                while (entries2Counter < entries2Size) {
-                                    mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter));
-                                    entries2Counter++;
+                Entry entry1, entry2;
+// Delete for Big O                int iterationsCounter=0;
+                if(entries2Size==0){ // If the are no entries in the second entries ArrayList
+                    while (entries1Counter < entries1Size) { // While there are entries to add in the first ArrayList
+// Delete for Big O                       iterationsCounter++;
+                        entry1=entries.get(i).get(entries1Counter);
+                        mTotal.entries.get(i).add(entry1); // Add entries to the ArrayList that stores the addition
+                        entries1Counter++; // Increase the counter for the first entries to not do more iterations than needed
+                    }
+                }else if(entries1Size==0){ // If there are no entries in the first entries ArrayList
+                    while (entries2Counter < entries2Size) { // While there are entries to add in the second ArrayList
+// Delete for Big O                       iterationsCounter++;
+                        entry2=M.entries.get(i).get(entries2Counter);
+                        mTotal.entries.get(i).add(entry2); // Add entries to the ArrayList that stores the addition
+                        entries2Counter++; // Increase the counter for the second entries to not do more iterations than needed
+                    }
+                }else { // If both entries ArrayLists have entries in them
+                    // Iterate through the size of the row in both entries added up (if there are no entries in any or it has reached the max per ArrayList the loop wont happen)
+                    for (int j = 0; (j < (entries2Size + entries1Size - 2)) && (entries1Counter < entries1Size && entries2Counter < entries2Size); j++) {
+                        entry1 = entries.get(i).get(entries1Counter);
+                        while (entry1.getColumn() == M.entries.get(i).get(entries2Counter).getColumn()) { // While the entries in both ArrayLists have the same column
+// Delete for Big O                       iterationsCounter++;
+                            entry1 = entries.get(i).get(entries1Counter);
+                            entry2 = M.entries.get(i).get(entries2Counter);
+                            int totVal = entry1.getValue() + entry2.getValue(); // Add the values in both ArrayLists
+                            mTotal.entries.get(i).add(new Entry(entry1.getColumn(), totVal)); // Add the entry to the ArrayList that stores the addition with the above variable
+                            entries1Counter++; // Increase the counter for the first entries to not do more iterations than needed
+                            entries2Counter++; // Increase the counter for the second entries to not do more iterations than needed
+                            if (entries1Counter >= entries1Size) { // If the maximum of entries in first ArrayList is reached
+                                while (entries2Counter < entries2Size) { // While there are entries in second ArrayList
+                                    entry2 = M.entries.get(i).get(entries2Counter);
+                                    mTotal.entries.get(i).add(entry2); // Add the entry to the ArrayList that stores the addition
+                                    entries2Counter++; // Increase the counter for the second entries to not do more iterations than needed
+// Delete for Big O                       iterationsCounter++;
                                 }
-                                break;
-                            }else if(entries2Counter>=entries2Size){
-                                while (entries1Counter < entries1Size) {
-                                    mTotal.entries.get(i).add(entries.get(i).get(entries1Counter));
-                                    entries1Counter++;
+                                break; // Break to avoid index out of bounds exception
+                            } else if (entries2Counter >= entries2Size) { // If the maximum of entries in second ArrayList is reached
+                                while (entries1Counter < entries1Size) { // While there are entries in first ArrayList
+                                    entry1 = entries.get(i).get(entries1Counter);
+                                    mTotal.entries.get(i).add(entry1); // Add the entry to the ArrayList that stores the addition
+                                    entries1Counter++; // Increase the counter for the first entries to not do more iterations than needed
+// Delete for Big O                       iterationsCounter++;
                                 }
-                                break;
-                            }else if(entries1Counter<=entries1Size && entries2Counter<=entries2Size){
-                                break;
+                                break; // Break to avoid index out of bounds exception
                             }
                         }
-                        if(entries1Counter<entries1Size && entries2Counter<entries2Size) {
-                            while (entries.get(i).get(entries1Counter).getColumn() < M.entries.get(i).get(entries2Counter).getColumn() && entries1Counter < entries1Size) {
-                                mTotal.entries.get(i).add(entries.get(i).get(entries1Counter));
-                                entries1Counter++;
+                        if (entries1Counter < entries1Size && entries2Counter < entries2Size) { // If both ArrayLists still have entries in them
+                            while (entries.get(i).get(entries1Counter).getColumn() < M.entries.get(i).get(entries2Counter).getColumn() && entries1Counter < entries1Size) { // While the entry in the first ArrayList has a column smaller than the second ArrayList
+// Delete for Big O                      iterationsCounter++;
+                                mTotal.entries.get(i).add(entries.get(i).get(entries1Counter)); // Add the entry to the ArrayList that stores the addition
+                                entries1Counter++; // Increase the counter for the first entries to not do more iterations than needed
                             }
-                            while (M.entries.get(i).get(entries2Counter).getColumn() < entries.get(i).get(entries1Counter).getColumn() && entries2Counter < entries2Size) {
-                                mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter));
-                                entries2Counter++;
+                            while (M.entries.get(i).get(entries2Counter).getColumn() < entries.get(i).get(entries1Counter).getColumn() && entries2Counter < entries2Size) { // While the entry in the second ArrayList has a column smaller than the first ArrayList
+// Delete for Big O                       iterationsCounter++;
+                                mTotal.entries.get(i).add(M.entries.get(i).get(entries2Counter)); // Add the entry to the ArrayList that stores the addition
+                                entries2Counter++; // Increase the counter for the second entries to not do more iterations than needed
                             }
                         }
                     }
                 }
+// Delete for Big O                       System.out.println("In row "+i+"\nn1: "+ entries1Size+ " n2: "+entries2Size+"\nn1+n2: "+(entries1Size+entries2Size)+" Iterations: "+iterationsCounter+"\n");
             }
         }
-        return mTotal;
+        return mTotal; // Return matrix which stores the addition of the two matrices
     }
 
     // Transposing a matrix
     public SparseMatrix transpose() {
-        SparseMatrix trans=new SparseMatrix();
+        SparseMatrix trans=new SparseMatrix(); // Create new matrix to store the transposed matrix
         trans.entries = new ArrayList <>();
-        for(int i = 0;i < numCols;i++) {
+        trans.numCols=numRows();
+        for (int i=0;i<numColumns();i++){
             trans.entries.add(new ArrayList <>());
         }
-        for(int i=0;i<entries.size();i++) {
-            trans.numCols++;
+        for(int i=0;i<numRows();i++) {
             for(int j = 0;j < entries.get(i).size();j++) {
                 int row=entries.get(i).get(j).getColumn();
                 int val=entries.get(i).get(j).getValue();
+                // Add entries to the transpose matrix entries ArrayList switching the row with the column
                 trans.entries.get(row).add(new Entry(i,val));
             }
         }
@@ -330,34 +348,36 @@ public class SparseMatrix {
     // Matrix-vector multiplication
     public DenseVector multiply(DenseVector v) {
         DenseVector vTemp = new DenseVector(entries.size());
-        if(v.size() != numColumns()) {
+        if(v.size() != numColumns()) { // Check vector size matches matrix size
             System.err.println("Vector size is not suitable for this matrix, please try again.");
         }else {
             for (int i = 0; i < entries.size(); i++) {
                 for (int j = 0; j < entries.get(i).size(); j++) {
                     int currCol = entries.get(i).get(j).getColumn();
                     int currVal = entries.get(i).get(j).getValue();
-                    int result = currVal * v.getElement(currCol);
-                    vTemp.setElement(i, (vTemp.getElement(i) + result));
+                    int result = currVal * v.getElement(currCol); // Multiply current value by the item in the vector
+                    result +=vTemp.getElement(i); // Add result to the rest of the results for that row
+                    vTemp.setElement(i, result); // Store result in temporary dense vector
                 }
             }
         }
-        return vTemp;
+        return vTemp; // Return temporary dense vector
     }
 
     // Count the number of non-zeros
     public int numNonZeros() {
-        int count=0;
-        for(int i=0;i<entries.size();i++){
-            count+=entries.get(i).size();
+        int count=0; // Create a counter
+        for(int i=0;i<numRows();i++){ // Iterate through the rows of entries
+            count+=entries.get(i).size(); // Add size of the entries row to the counter
         }
-        return count;
+        return count; // return the counter
     }
 
     // Multiply the matrix by a scalar, and update the matrix elements
     public void multiplyBy(int scalar) {
         for(int i = 0;i < entries.size();i++) {
             for(int j = 0;j < entries.get(i).size();j++) {
+                // Get item value in position (i,j), multiply it by the scalar, and store it back in the ArrayList
                 entries.get(i).get(j).setValue(entries.get(i).get(j).getValue()*scalar);
             }
         }
@@ -401,46 +421,3 @@ public class SparseMatrix {
         }
     }
 }
-
-/*
-public SparseMatrix add(SparseMatrix M) {
-    SparseMatrix mTotal=new SparseMatrix();
-    mTotal.entries=new ArrayList<>();
-    mTotal.numCols=M.numColumns();
-    for(int i = 0;i < M.entries.size();i++) {
-        mTotal.entries.add(new ArrayList <>());
-    }
-    if(numColumns()!=M.numColumns() || numRows()!=M.numRows()) {
-        System.err.println("Matrices sizes are not equal.");
-    }else {
-        for(int i=0;i<numRows();i++){
-            List<Integer> colsFirstM=new ArrayList <>();
-            for(int j=0;j<M.entries.get(i).size();j++){
-                mTotal.entries.get(i).add(new Entry(M.entries.get(i).get(j).getColumn(),M.entries.get(i).get(j).getValue()));
-                colsFirstM.add(mTotal.entries.get(i).get(j).getColumn());
-            }
-            for(int j=0;j<entries.get(i).size();j++){
-                int currCol=entries.get(i).get(j).getColumn();
-                int curVal=entries.get(i).get(j).getValue();
-                if(colsFirstM.contains(currCol)){
-                    int col=colsFirstM.indexOf(currCol);
-                    mTotal.entries.get(i).get(col).setValue(mTotal.entries.get(i).get(col).getValue()+curVal);
-                }else if(colsFirstM.size()==0 || currCol>colsFirstM.get(colsFirstM.size()-1)){
-                    mTotal.entries.get(i).add(new Entry(currCol,curVal));
-                    colsFirstM.add(currCol);
-                }else{
-                    int k;
-                    for(k=0;k<colsFirstM.size();k++){
-                        if(colsFirstM.get(k)>currCol){
-                            break;
-                        }
-                    }
-                    mTotal.entries.get(i).add(k, new Entry(currCol,curVal));
-                    colsFirstM.add(k,currCol);
-                }
-            }
-        }
-    }
-    return mTotal;
-}
-*/
